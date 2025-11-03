@@ -47,3 +47,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Flask uploads
+/uploads/
+*.pdf
