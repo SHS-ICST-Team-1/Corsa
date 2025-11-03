@@ -334,8 +334,10 @@ class CourseTokenizer:
             import tiktoken
             self.encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
             self.use_tiktoken = True
-        except ImportError:
-            print("Warning: tiktoken not installed. Using simple tokenization.")
+        except (ImportError, Exception):
+            # Fallback to simple tokenization if tiktoken is not available
+            # or cannot download required data
+            pass
     
     def tokenize_course(self, course: Dict) -> str:
         """
