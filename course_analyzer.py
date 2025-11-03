@@ -70,12 +70,13 @@ class PDFParser:
                 continue
             
             # Simple pattern matching for course codes (e.g., CS101, MATH201)
-            if len(line.split()) > 0 and any(char.isdigit() for char in line.split()[0]):
+            line_parts = line.split()
+            if line_parts and any(char.isdigit() for char in line_parts[0]):
                 if current_course:
                     courses.append(current_course)
                 current_course = {
-                    'code': line.split()[0] if line.split() else '',
-                    'name': ' '.join(line.split()[1:]) if len(line.split()) > 1 else line,
+                    'code': line_parts[0],
+                    'name': ' '.join(line_parts[1:]) if len(line_parts) > 1 else line,
                     'description': '',
                     'credits': 3,
                     'prerequisites': [],
@@ -328,11 +329,18 @@ class GraduationRequirements:
 class CourseTokenizer:
     """Tokenize course data for AI processing."""
     
-    def __init__(self):
+    def __init__(self, model_name: str = "gpt-3.5-turbo"):
+        """
+        Initialize the tokenizer.
+        
+        Args:
+            model_name: The model name to use for tokenization (default: gpt-3.5-turbo)
+        """
+        self.model_name = model_name
         self.use_tiktoken = False
         try:
             import tiktoken
-            self.encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+            self.encoding = tiktoken.encoding_for_model(self.model_name)
             self.use_tiktoken = True
         except (ImportError, Exception):
             # Fallback to simple tokenization if tiktoken is not available
@@ -376,8 +384,16 @@ class CourseTokenizer:
 class AIEvaluator:
     """Use AI to evaluate and recommend courses."""
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = "gpt-3.5-turbo"):
+        """
+        Initialize the AI evaluator.
+        
+        Args:
+            api_key: OpenAI API key (optional, uses OPENAI_API_KEY env var if not provided)
+            model_name: The model to use for evaluation (default: gpt-3.5-turbo)
+        """
         self.api_key = api_key or os.environ.get('OPENAI_API_KEY')
+        self.model_name = model_name
         self.use_openai = False
         
         if self.api_key:
@@ -445,7 +461,7 @@ Format your response as JSON array."""
 
         try:
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=self.model_name,
                 messages=[
                     {"role": "system", "content": "You are a helpful course recommendation assistant."},
                     {"role": "user", "content": prompt}
