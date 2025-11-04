@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Selection AI Analyzer 3000</title>
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #34495e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .upload-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #34495e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+        .center-text{
+            text-align: center;
+        }
+        .title-text{
+            font-family: Arial, Helvetica, sans-serif;
+            font-style: italic;
+        }
+        .italic{
+            font-style: italic;
+        }
+        
+        .file-upload {
+            background-color: #2c3e50;
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .file-upload:hover {
+            background-color: #2c5270;
+            border-color: #2980b9;
+        }
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        .upload-content {
+            display: block;
+        }
+        .upload-text {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .upload-subtext {
+            font-size: 0.9em;
+            color: #bdc3c7;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        .browse-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .browse-button:hover {
+            background-color: #2980b9;
+        }
+        .upload-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .upload-button:hover {
+            background-color: #c0392b;
+        }
+        .upload-button:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+        }
+        .file-name {
+            margin-top: 15px;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title-text">Corsa</h1>
+        <p class="center-text italic">Upload your coursebook to get started!</p>
+    </div>
+
+    <div class="upload-container">
+        <div class="file-upload" id="fileUpload">
+            <div class="upload-content">
+                <div class="upload-text">Drag and drop your coursebook PDF here</div>
+                <div class="upload-subtext">or</div>
+                <button type="button" class="browse-button" onclick="document.getElementById('fileInput').click()">
+                    Browse Files
+                </button>
+                <input type="file" id="fileInput" accept=".pdf" />
+            </div>
+            <div class="file-name" id="fileName"></div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="upload-button" id="uploadButton" disabled>Analyze Coursebook</button>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const uploadButton = document.getElementById('uploadButton');
+        const fileUpload = document.getElementById('fileUpload');
+
+        // Handle file selection from button
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                fileName.textContent = `Selected: ${file.name}`;
+                uploadButton.disabled = false;
+            }
+        });
+
+        // Handle drag and drop
+        fileUpload.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = '#2c5270';
+            this.style.borderColor = '#2980b9';
+        });
+
+        fileUpload.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = '#2c3e50';
+            this.style.borderColor = '#3498db';
+        });
+
+        fileUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = '#2c3e50';
+            this.style.borderColor = '#3498db';
+            
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                const file = e.dataTransfer.files[0];
+                if (file.type === 'application/pdf') {
+                    fileInput.files = e.dataTransfer.files;
+                    fileName.textContent = `Selected: ${file.name}`;
+                    uploadButton.disabled = false;
+                } else {
+                    fileName.textContent = 'Please select a PDF file';
+                    fileName.style.color = '#e74c3c';
+                }
+            }
+        });
+        uploadButton.addEventListener('click', async function() {
+            if (!fileInput.files[0]) return;
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                uploadButton.textContent = 'Analyzing...';
+                uploadButton.disabled = true;
+                
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    fileName.textContent = 'File uploaded successfully!';
+                    fileName.style.color = '#2ecc71';
+                } else {
+                    const error = await response.text();
+                    fileName.textContent = `Error: ${error}`;
+                    fileName.style.color = '#e74c3c';
+                }
+            } catch (error) {
+                fileName.textContent = 'Upload failed';
+                fileName.style.color = '#e74c3c';
+            } finally {
+                uploadButton.textContent = 'Analyze Coursebook';
+                uploadButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
